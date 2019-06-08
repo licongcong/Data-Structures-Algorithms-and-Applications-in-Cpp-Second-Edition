@@ -172,13 +172,58 @@ namespace Contains{
         cout << "contains(7): " << contains(arr, 7, 7) << endl;
     }
 }
+
+// 25. 子集生成方法（Subset Generation）
+namespace SubsetGeneration {
+    // 1. 当前元素不存在子集当中时，其余元素所构成的子集
+    // 2. 当前元素存在于子集当中时，其余元素所构成的子集
+    unsigned int arr[10000];
+    void subsetGeneration(unsigned int n, int curr) {
+
+        if (curr == n) {
+            for (int i=0; i < n; i++) {
+                cout << arr[i];
+            }
+            cout << endl;
+            return;
+        }
+        arr[curr] = 0;
+        subsetGeneration(n, curr+1);
+        arr[curr] = 1;
+        subsetGeneration(n, curr+1);
+
+    }
+    void test() {
+        cout << "25. " << endl;
+        subsetGeneration(3, 0);
+    }
+}
+
+// 26. 格雷码（Gray Code）
+namespace GrayCode {
+    void grayCode(unsigned int n) {
+        if (n == 1) {
+            cout << 1;
+            return;
+        }
+        grayCode(n-1);
+        cout << ", " << n << ", ";
+        grayCode(n-1);
+    }
+    void test() {
+        cout << "26. " << endl;
+        grayCode(4);
+    }
+}
 int main() {
     std::cout << "Hello, World!" << std::endl;
-//    Factorial::test();
-//    Fibonacci::test();
-//    Function::test();
-//    Ackermann::test();
-//    Gcd::test();
+    Factorial::test();
+    Fibonacci::test();
+    Function::test();
+    Ackermann::test();
+    Gcd::test();
     Contains::test();
+    SubsetGeneration::test();
+    GrayCode::test();
     return 0;
 }
