@@ -102,7 +102,10 @@ namespace ArrayListSpace {
         void output() const final;
         int capacity() const {return this->m_arrayLength;}
         void trimToSize(int listSize);
-
+        void setSize(int size);
+        T& operator[](int index);
+        const T&operator[](int index) const;
+        bool operator==(const ArrayList<T> &arraylist) const;
     private:
         T *m_element;
         int m_arrayLength;
@@ -188,6 +191,8 @@ namespace ArrayListSpace {
         cout << endl;
     }
 
+    // 5. 编写一个方法 arrayList<T>::trimToSize，它使数组的长度等于max(listSize, 1).
+    // 感觉自己没有看懂这题想干什么 -_-//
     template <typename T>
     void ArrayList<T>::trimToSize(int listSize) {
         int size = max(listSize, 1);
@@ -202,8 +207,67 @@ namespace ArrayListSpace {
         this->m_arrayLength = size;
         this->m_listSize = newSize;
     }
+    // 6. 编写方法 arrayList<T>::setSize, 它使线性表的大小等于指定的大小。
+    // 若线性表开始时的大小小于指定的大小，则不增加元素。
+    // 若线性表开始的大小大于指定的大小，则删除多余的元素
+    template <typename T>
+    void ArrayList<T>::setSize(int size) {
+        if (size <= 0) {
+            throw "size should > 0";
+        }
 
+        if (size == this->m_arrayLength) {
+            return;
+        }
 
+        T *tempElement = new T[size];
+        int newSize = min(size, this->m_listSize);
+        copy(this->m_element, this->m_element+this->newSize, tempElement);
+
+        delete [] this->m_element;
+        this->m_element = tempElement;
+        tempElement = nullptr;
+
+        this->m_listSize = newSize;
+        this->m_arrayLength = size;
+
+    }
+
+    // 7. 重载操作符[], 使表达式 x[i]  返回对线性表第 i 个元素的引用
+    // 若线性表没有第 i 个元素，则抛出异常。语句 x[i] = y 和　y = x[i] 按预期方式执行
+    // 未实现使用 [] 插入元素的功能
+    template <typename T>
+    T & ArrayList<T>::operator[](int index) {
+        if (index >= this->m_listSize || index < 0) {
+            throw "index out of range";
+        }
+        return this->m_element[index];
+    }
+    template <typename T>
+    const T& ArrayList<T>::operator[](int index) const {
+        if (index >= this->m_listSize || index < 0) {
+            throw "index out of range";
+        }
+        return this->m_element[index];
+    }
+
+    // 8. 重载操作符 == ，使得表达式 x==y 返回 true, 当且仅当两个用数组描述的线性表 x 和 y 相等（即对所有的 i, 两个线性表的第 i 的元素相等
+    // 是否需要考虑 arrayLength 是否相同？
+    template <typename T>
+    bool ArrayList<T>::operator==(const ArrayListSpace::ArrayList<T> &arraylist) const {
+        if (this->m_listSize != arraylist.m_listSize) {
+            return false;
+        }
+        int index = 0;
+        while (index < this->m_listSize) {
+            if (this->m_element[index] != arraylist[index]) {
+                return false;
+            }
+            index++;
+        }
+        return true;
+
+    }
     void test() {
         ArrayList<int> arrayList(4);
         cout << "4. " << endl;
@@ -216,7 +280,31 @@ namespace ArrayListSpace {
         arrayList.trimToSize(3);
         cout << arrayList.capacity() << endl;
         cout << arrayList.size() << endl;
+        arrayList.output();
+        cout << "7. " << endl;
+        arrayList[1] = 10;
+        arrayList.output();
+        try {
+            arrayList[10] = 10;
+        } catch (const char * e) {
+            cout << e << endl;
+        }
+        int y = arrayList[0];
+        cout << y << endl;
 
+        cout << "8. " << endl;
+        ArrayList<int> newList(3);
+//        newList[0] = 1;
+//        newList[1] = 10;
+        newList.insert(0, 1);
+        newList.insert(1, 10);
+        arrayList.output();
+        newList.output();
+        cout << (arrayList == newList) << endl;
+//        newList[2] = 3;
+        newList.insert(2, 3);
+        newList.output();
+        cout << (arrayList == newList) << endl;
     }
 }
 int main() {
