@@ -124,10 +124,10 @@ namespace ArrayListSpace {
     }
     template <typename T>
     ArrayList<T>::ArrayList(const ArrayList<T> &arrayList) {
-        this->m_listSize = arrayList.m_listSize;
-        this->m_arrayLength = arrayList.m_arrayLength;
-        this->m_element = new T[this->m_arrayLength];
-        copy(arrayList.m_element, arrayList.m_element+arrayList.m_listSize, this->m_element);
+        this->m_listSize = arrayList.size();
+        this->m_arrayLength = arrayList.capacity();
+        this->m_element = new T[this->size()];
+        copy(arrayList.m_element, arrayList.m_element+arrayList.size(), this->m_element);
     }
 
     template <typename T>
@@ -137,7 +137,7 @@ namespace ArrayListSpace {
 
     template <typename T>
     T ArrayList<T>::get(int index) const {
-        if (index < 0 || index >= this->m_listSize) {
+        if (index < 0 || index >= this->size()) {
             throw "index of out range";
         }
         return this->m_element[index];
@@ -147,8 +147,8 @@ namespace ArrayListSpace {
     int ArrayList<T>::indexOf(T x) const {
         int result = -1;
 
-        int findResult = find(this->m_element, this->m_element+this->m_listSize, x) - this->m_element;
-        if (findResult == this->m_listSize) {
+        int findResult = find(this->m_element, this->m_element+this->size(), x) - this->m_element;
+        if (findResult == this->size()) {
             result = -1;
         } else {
             result = findResult;
@@ -159,38 +159,38 @@ namespace ArrayListSpace {
     template <typename T>
     void ArrayList<T>::erase(int index) {
 
-        if (index < 0 || index >= this->m_listSize) {
+        if (index < 0 || index >= this->size()) {
             throw "index out of range";
         }
 
-        copy(this->m_element+index+1, this->m_element+this->m_listSize, this->m_element+index);
-        this->m_element[this->m_listSize].~T(); // 调用析构函数，防止因为是自定义对象类型元素而造成内在泄露
+        copy(this->m_element+index+1, this->m_element+this->size(), this->m_element+index);
+        this->m_element[this->size()].~T(); // 调用析构函数，防止因为是自定义对象类型元素而造成内在泄露
         this->m_listSize--;
     }
 
     template <typename T>
     void ArrayList<T>::insert(int index, T x) {
-        if (index < 0 || index > m_listSize) { // 确认插入位置是否有效, [0, m_listSize] 之间
+        if (index < 0 || index > this->size()) { // 确认插入位置是否有效, [0, m_listSize] 之间
             throw "index out of range";
         }
-        if (m_listSize == m_arrayLength) {
-            int arrayLength = this->m_arrayLength * this->m_factor;
+        if (this->size() == this->capacity()) {
+            int arrayLength = this->size() * this->m_factor;
             T *tempArray = new T[arrayLength];
-            copy(this->m_element, this->m_element+this->m_arrayLength, tempArray);
+            copy(this->m_element, this->m_element+this->size(), tempArray);
             delete [] this->m_element;
             this->m_element = tempArray;
             tempArray = nullptr;
             this->m_arrayLength = arrayLength;
         }
 
-        copy(this->m_element+index, this->m_element+this->m_listSize, this->m_element+index+1);
+        copy(this->m_element+index, this->m_element+this->size(), this->m_element+index+1);
         this->m_listSize++;
         this->m_element[index] = x;
     }
 
     template <typename T>
     void ArrayList<T>::output() const {
-        copy(this->m_element, this->m_element+this->m_listSize, ostream_iterator<T>(cout, " "));
+        copy(this->m_element, this->m_element+this->size(), ostream_iterator<T>(cout, " "));
         cout << endl;
     }
 
@@ -201,7 +201,7 @@ namespace ArrayListSpace {
         int size = max(listSize, 1);
 
         T *tempArray = new T[size];
-        int newSize = min(size, this->m_listSize);
+        int newSize = min(size, this->size());
         copy(this->m_element, this->m_element+newSize, tempArray);
         delete [] this->m_element;
         this->m_element = tempArray;
@@ -219,13 +219,13 @@ namespace ArrayListSpace {
             throw "size should > 0";
         }
 
-        if (size == this->m_arrayLength) {
+        if (size == this->capacity()) {
             return;
         }
 
         T *tempElement = new T[size];
-        int newSize = min(size, this->m_listSize);
-        copy(this->m_element, this->m_element+this->newSize, tempElement);
+        int newSize = min(size, this->size());
+        copy(this->m_element, this->m_element+newSize, tempElement);
 
         delete [] this->m_element;
         this->m_element = tempElement;
@@ -241,14 +241,14 @@ namespace ArrayListSpace {
     // 未实现使用 [] 插入元素的功能
     template <typename T>
     T & ArrayList<T>::operator[](int index) {
-        if (index >= this->m_listSize || index < 0) {
+        if (index >= this->size() || index < 0) {
             throw "index out of range";
         }
         return this->m_element[index];
     }
     template <typename T>
     const T& ArrayList<T>::operator[](int index) const {
-        if (index >= this->m_listSize || index < 0) {
+        if (index >= this->size() || index < 0) {
             throw "index out of range";
         }
         return this->m_element[index];
@@ -258,11 +258,11 @@ namespace ArrayListSpace {
     // 是否需要考虑 arrayLength 是否相同？
     template <typename T>
     bool ArrayList<T>::operator==(const ArrayListSpace::ArrayList<T> &arrayList) const {
-        if (this->m_listSize != arrayList.m_listSize) {
+        if (this->size() != arrayList.size()) {
             return false;
         }
         int index = 0;
-        while (index < this->m_listSize) {
+        while (index < this->size()) {
             if (this->m_element[index] != arrayList[index]) {
                 return false;
             }
@@ -275,11 +275,11 @@ namespace ArrayListSpace {
     // 9. 重载操作符 !=，使得表达式 x!=y 返回 true, 当且仅当两个用数组描述的线性表 x 和 y 不相等
     template <typename T>
     bool ArrayList<T>::operator!=(const ArrayListSpace::ArrayList<T> &arrayList) const {
-        if (this->m_listSize != arrayList.m_listSize) {
+        if (this->size() != arrayList.size()) {
             return true;
         }
         int index = 0;
-        while (index < this->m_listSize) {
+        while (index < this->size()) {
             if (this->m_element[index] != arrayList[index]) {
                 return true;
             }
@@ -306,7 +306,7 @@ namespace ArrayListSpace {
             }
             index++;
         }
-        if (this->m_listSize < arrayList.m_listSize) {
+        if (this->size() < arrayList.size()) {
             return true;
         }
         return false;
