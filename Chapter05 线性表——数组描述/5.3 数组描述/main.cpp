@@ -105,7 +105,10 @@ namespace ArrayListSpace {
         void setSize(int size);
         T& operator[](int index);
         const T&operator[](int index) const;
-        bool operator==(const ArrayList<T> &arraylist) const;
+        bool operator==(const ArrayList<T> &arrayList) const;
+        bool operator!=(const ArrayList<T> &arrayList) const;
+        bool operator<(const ArrayList<T> &arrayList) const;
+
     private:
         T *m_element;
         int m_arrayLength;
@@ -254,19 +257,59 @@ namespace ArrayListSpace {
     // 8. 重载操作符 == ，使得表达式 x==y 返回 true, 当且仅当两个用数组描述的线性表 x 和 y 相等（即对所有的 i, 两个线性表的第 i 的元素相等
     // 是否需要考虑 arrayLength 是否相同？
     template <typename T>
-    bool ArrayList<T>::operator==(const ArrayListSpace::ArrayList<T> &arraylist) const {
-        if (this->m_listSize != arraylist.m_listSize) {
+    bool ArrayList<T>::operator==(const ArrayListSpace::ArrayList<T> &arrayList) const {
+        if (this->m_listSize != arrayList.m_listSize) {
             return false;
         }
         int index = 0;
         while (index < this->m_listSize) {
-            if (this->m_element[index] != arraylist[index]) {
+            if (this->m_element[index] != arrayList[index]) {
                 return false;
             }
             index++;
         }
         return true;
 
+    }
+
+    // 9. 重载操作符 !=，使得表达式 x!=y 返回 true, 当且仅当两个用数组描述的线性表 x 和 y 不相等
+    template <typename T>
+    bool ArrayList<T>::operator!=(const ArrayListSpace::ArrayList<T> &arrayList) const {
+        if (this->m_listSize != arrayList.m_listSize) {
+            return true;
+        }
+        int index = 0;
+        while (index < this->m_listSize) {
+            if (this->m_element[index] != arrayList[index]) {
+                return true;
+            }
+            index++;
+        }
+        return false;
+    }
+
+    // 10. 重载操作符 <，使得线性表 x < y 返回 true, 当且仅当用数组描述的线性表 x 按字典序小于用数组描述的线性表 y
+    template <typename T>
+    bool ArrayList<T>::operator<(const ArrayListSpace::ArrayList<T> &arrayList) const {
+        if (arrayList.empty()) {
+            return false;
+        }
+        if (this->empty()) {
+            return true;
+        }
+
+        int index = 0;
+        int minLength = min(this->m_listSize, arrayList.m_listSize);
+        while (index < minLength) {
+            if (this->m_element[index] > arrayList[index]) {
+                return false;
+            }
+            index++;
+        }
+        if (this->m_listSize < arrayList.m_listSize) {
+            return true;
+        }
+        return false;
     }
     void test() {
         ArrayList<int> arrayList(4);
@@ -305,6 +348,19 @@ namespace ArrayListSpace {
         newList.insert(2, 3);
         newList.output();
         cout << (arrayList == newList) << endl;
+        cout << "9. " << endl;
+        cout << (arrayList != newList) << endl;
+        newList.erase(2);
+        cout << (arrayList != newList) << endl;
+
+        cout << "10. " << endl;
+        arrayList.output();
+        newList.output();
+        cout << (arrayList < newList) << endl;
+        newList.insert(2, 3);
+        arrayList.output();
+        newList.output();
+        cout << (arrayList < newList) << endl;
     }
 }
 int main() {
