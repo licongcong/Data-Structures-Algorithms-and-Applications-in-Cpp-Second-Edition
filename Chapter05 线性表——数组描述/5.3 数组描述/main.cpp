@@ -108,6 +108,8 @@ namespace ArrayListSpace {
         bool operator==(const ArrayList<T> &arrayList) const;
         bool operator!=(const ArrayList<T> &arrayList) const;
         bool operator<(const ArrayList<T> &arrayList) const;
+        void push_back(T theElement);
+        void pop_back();
 
     private:
         T *m_element;
@@ -311,6 +313,27 @@ namespace ArrayListSpace {
         }
         return false;
     }
+
+    // 11. 编写方法 ArrayList<T>::push_back，它把元素 theElement 插到线性表的右端。不要使用 insert 方法
+    template <typename T>
+    void ArrayList<T>::push_back(T theElement) {
+        if (this->size() == this->capacity()) {
+            int newArrayLength = this->capacity() * this->m_factor;
+            this->setSize(newArrayLength);
+        }
+        this->m_element[this->size()] = theElement;
+        this->m_listSize++;
+    }
+
+    // 12. 编写一个 ArrayList<T>::pop_back，它把线性表右端的元素删除。不要使用 erase 方法
+    template <typename T>
+    void ArrayList<T>::pop_back() {
+        if (this->size() == 0) {
+            throw "size = 0, nothing to pop";
+        }
+        this->m_listSize--;
+    }
+
     void test() {
         ArrayList<int> arrayList(4);
         cout << "4. " << endl;
@@ -361,6 +384,25 @@ namespace ArrayListSpace {
         arrayList.output();
         newList.output();
         cout << (arrayList < newList) << endl;
+
+        cout << "11. " << endl;
+        for (int i=0; i < 10; i++) {
+            newList.push_back(i + 10);
+            cout << newList.capacity() << " ";
+        }
+        newList.push_back(4);
+        newList.output();
+
+        cout << "12. " << endl;
+        for (int i=0; i < 15; i++) {
+            try {
+                newList.pop_back();
+                newList.output();
+            } catch (char const *e) {
+                cout << e << endl;
+            }
+
+        }
     }
 }
 int main() {
