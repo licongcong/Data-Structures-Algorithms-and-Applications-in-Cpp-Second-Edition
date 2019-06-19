@@ -110,6 +110,12 @@ namespace ArrayListSpace {
         bool operator<(const ArrayList<T> &arrayList) const;
         void push_back(T theElement);
         void pop_back();
+        void swap(ArrayList<T> &arrayList);
+        void reserve(int theCapacity);
+        T set(int theIndex, T theElement);
+        void clear();
+        void removeRange(int start, int end);
+        int lastIndexOf(T theElement) const;
 
     private:
         T *m_element;
@@ -334,6 +340,76 @@ namespace ArrayListSpace {
         this->m_listSize--;
     }
 
+    // 13. 编写方法 ArrayList<T>::swap(theList)，它交换线性表的元素 *this 和 theList
+    template <typename T>
+    void ArrayList<T>::swap(ArrayListSpace::ArrayList<T> &arrayList) {
+        T *tempElement = this->m_element;
+        this->m_element = arrayList.m_element;
+        arrayList.m_element = tempElement;
+
+        std::swap(this->m_listSize, arrayList.m_listSize);
+        std::swap(this->m_arrayLength, arrayList.m_arrayLength);
+        std::swap(this->m_factor, arrayList.m_factor);
+
+    }
+
+    // 14. 编写方法 ArrayList<T>::reserve(theCapacity), 它把数组的容量改变为当前容量和 theCapacity 的较大者
+    template <typename T>
+    void ArrayList<T>::reserve(int theCapacity) {
+        if (theCapacity > this->capacity()) {
+            this->setSize(theCapacity);
+        }
+
+    }
+
+    // 15. 编写方法 ArrayList<T>::set(theIndex, theElement)，它用元素 theElement 代替索引用 theIndex 的元素.
+    //     若索引 theIndex 超出范围，则抛出异常。返回原来索引为 theIndex 的元素。
+    template <typename T>
+    T ArrayList<T>::set(int theIndex, T theElement) {
+        if (theIndex >= this->size() || theIndex < 0) {
+            throw "index out of range";
+        }
+        T result = this->m_element[theIndex];
+        this->m_element[theIndex] = theElement;
+        return result;
+    }
+
+    // 16. 编写方法 ArrayList<T>::clear，它使线性表为空。
+    template <typename T>
+    void ArrayList<T>::clear() {
+        this->m_listSize = 0;
+    }
+
+    // 17. 编写方法 ArrayList<T>::removeRange, 它删除指定范围内的所有元素。
+    template <typename T>
+    void ArrayList<T>::removeRange(int start, int end) {
+        if (start > end || start >= this->size() || start < 0 || end < 0 || end >= this->size()) {
+            throw "wrong range";
+        }
+
+        int removeSize = end - start + 1;
+        copy(this->m_element+end+1, this->m_element+this->size(), this->m_element+start);
+        this->m_listSize -= removeSize;
+
+    }
+
+    // 18. 编写方法 ArrayList<T>::lastIndexOf, 它的返回值是指定元素最后出现时的索引。如果这样的元素不存在，则返回 -1
+    template <typename T>
+    int ArrayList<T>::lastIndexOf(T theElement) const {
+        if (this->empty()) {
+            return -1;
+        }
+
+        int index = this->size() - 1;
+        while (index >= 0) {
+            if (this->m_element[index] == theElement) {
+                return index;
+            }
+            index--;
+        }
+        return -1;
+    }
+
     void test() {
         ArrayList<int> arrayList(4);
         cout << "4. " << endl;
@@ -403,6 +479,58 @@ namespace ArrayListSpace {
             }
 
         }
+
+        cout << "13. " << endl;
+        for (int i=0; i < 5; i++) {
+            newList.push_back(i+1);
+        }
+        newList.output();
+        arrayList.output();
+        newList.swap(arrayList);
+        newList.output();
+        arrayList.output();
+
+        cout << "14. " << endl;
+        cout << newList.capacity() << endl;
+        newList.reserve(20);
+        cout << newList.capacity() << endl;
+
+        cout << "15. " << endl;
+        try {
+            newList.output();
+            cout << newList.set(2, 100) << endl;
+            newList.output();
+        } catch (char const *error) {
+            cout << error << endl;
+        }
+        newList.set(1, 1111);
+        newList.output();
+
+        cout << "16. " << endl;
+        newList.clear();
+        newList.output();
+
+        cout << "17. " << endl;
+        arrayList.output();
+        for (int i=0; i < 5; i++) {
+            arrayList.push_back(i+10);
+        }
+        arrayList.output();
+        arrayList.removeRange(2, 2);
+        arrayList.output();
+        arrayList.removeRange(2, 5);
+        arrayList.output();
+        try {
+            arrayList.removeRange(2, 10);
+        } catch (char const *error) {
+            cout << error << endl;
+        }
+
+        cout << "18. " << endl;
+        arrayList.insert(3, 1);
+        arrayList.output();
+        cout << arrayList.lastIndexOf(10) << endl;
+        cout << arrayList.lastIndexOf(1) << endl;
     }
 }
 int main() {
