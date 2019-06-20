@@ -122,11 +122,12 @@ namespace ArrayListSpace {
         int m_arrayLength;
         int m_listSize;
         int m_factor;
+        int m_initialCapacity;
 
     };
 
     template <typename T>
-    ArrayList<T>::ArrayList(int arrayLength, int factor):m_arrayLength(arrayLength), m_factor(factor) {
+    ArrayList<T>::ArrayList(int arrayLength, int factor):m_arrayLength(arrayLength), m_initialCapacity(arrayLength), m_factor(factor) {
         this->m_listSize = 0;
         this->m_element = new T[arrayLength];
     }
@@ -172,7 +173,7 @@ namespace ArrayListSpace {
         }
 
         copy(this->m_element+index+1, this->m_element+this->size(), this->m_element+index);
-        this->m_element[this->size()].~T(); // 调用析构函数，防止因为是自定义对象类型元素而造成内在泄露
+        this->m_element[this->size()-1].~T(); // 调用析构函数，防止因为是自定义对象类型元素而造成内在泄露
         this->m_listSize--;
     }
 
@@ -337,6 +338,7 @@ namespace ArrayListSpace {
         if (this->size() == 0) {
             throw "size = 0, nothing to pop";
         }
+        this->m_element[this->size()-1].~T();
         this->m_listSize--;
     }
 
@@ -377,6 +379,9 @@ namespace ArrayListSpace {
     // 16. 编写方法 ArrayList<T>::clear，它使线性表为空。
     template <typename T>
     void ArrayList<T>::clear() {
+        for (int i=0; i < this->size(); i++) {
+            this->m_element[i].~T();
+        }
         this->m_listSize = 0;
     }
 
@@ -390,6 +395,10 @@ namespace ArrayListSpace {
         int removeSize = end - start + 1;
         copy(this->m_element+end+1, this->m_element+this->size(), this->m_element+start);
         this->m_listSize -= removeSize;
+
+        for (int i=this->size(); i<this->size()+removeSize; i++) {
+            this->m_element[i].~T();
+        }
 
     }
 
@@ -410,6 +419,10 @@ namespace ArrayListSpace {
         return -1;
     }
 
+    // 20. 编写类 ArrayList 的一个新版本。如果在删除之后，线性表的大小降至 arrayList/4 以下，就创建一个新的数组，
+    //     长度为 max{arrayLength/2, initialCapacity}
+    // 增加一个 m_initialCapacity 属性，每次删除之后检查线性表大小，如果满足要求则重新设置大小
+    // 涉及到的删除操作有：removeRange(), clear(), pop_back(), erase()
     void test() {
         ArrayList<int> arrayList(4);
         cout << "4. " << endl;
