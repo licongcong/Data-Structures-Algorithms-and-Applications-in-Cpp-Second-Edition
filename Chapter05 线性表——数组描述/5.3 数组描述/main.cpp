@@ -116,6 +116,7 @@ namespace ArrayListSpace {
         void clear();
         void removeRange(int start, int end);
         int lastIndexOf(T theElement) const;
+        void setCapacity();
 
     private:
         T *m_element;
@@ -175,6 +176,8 @@ namespace ArrayListSpace {
         copy(this->m_element+index+1, this->m_element+this->size(), this->m_element+index);
         this->m_element[this->size()-1].~T(); // 调用析构函数，防止因为是自定义对象类型元素而造成内在泄露
         this->m_listSize--;
+
+        this->setCapacity();
     }
 
     template <typename T>
@@ -340,6 +343,8 @@ namespace ArrayListSpace {
         }
         this->m_element[this->size()-1].~T();
         this->m_listSize--;
+
+        this->setCapacity();
     }
 
     // 13. 编写方法 ArrayList<T>::swap(theList)，它交换线性表的元素 *this 和 theList
@@ -383,6 +388,9 @@ namespace ArrayListSpace {
             this->m_element[i].~T();
         }
         this->m_listSize = 0;
+
+        this->setCapacity();
+
     }
 
     // 17. 编写方法 ArrayList<T>::removeRange, 它删除指定范围内的所有元素。
@@ -400,6 +408,7 @@ namespace ArrayListSpace {
             this->m_element[i].~T();
         }
 
+        this->setCapacity();
     }
 
     // 18. 编写方法 ArrayList<T>::lastIndexOf, 它的返回值是指定元素最后出现时的索引。如果这样的元素不存在，则返回 -1
@@ -423,6 +432,13 @@ namespace ArrayListSpace {
     //     长度为 max{arrayLength/2, initialCapacity}
     // 增加一个 m_initialCapacity 属性，每次删除之后检查线性表大小，如果满足要求则重新设置大小
     // 涉及到的删除操作有：removeRange(), clear(), pop_back(), erase()
+    template <typename T>
+    void ArrayList<T>::setCapacity() {
+        if (this->size() < this->capacity()/4) {
+            int newCapacity = max(this->capacity()/2, this->m_initialCapacity);
+            this->setSize(newCapacity);
+        }
+    }
     void test() {
         ArrayList<int> arrayList(4);
         cout << "4. " << endl;
@@ -544,6 +560,24 @@ namespace ArrayListSpace {
         arrayList.output();
         cout << arrayList.lastIndexOf(10) << endl;
         cout << arrayList.lastIndexOf(1) << endl;
+
+        cout << "19. " << endl;
+        for (int i=0; i < 20; i++) {
+            arrayList.push_back(i+10);
+        }
+        arrayList.output();
+        cout << arrayList.capacity() << " " << arrayList.size() << " " << endl;
+        for (int i=0; i < 15; i++) {
+            arrayList.pop_back();
+            cout << arrayList.capacity() << " " << arrayList.size() << endl;
+        }
+        arrayList.removeRange(1, 7);
+        cout << arrayList.capacity() << " " << arrayList.size() << endl;
+        arrayList.erase(2);
+        arrayList.erase(2);
+        cout << arrayList.capacity() << " " << arrayList.size() << endl;
+        arrayList.clear();
+        cout << arrayList.capacity() << " " << arrayList.size() << endl;
     }
 }
 int main() {
