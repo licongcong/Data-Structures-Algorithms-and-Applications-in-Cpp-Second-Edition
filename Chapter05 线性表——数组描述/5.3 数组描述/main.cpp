@@ -1,4 +1,5 @@
 #include <iostream>
+#include <time.h>
 using namespace std;
 
 // 3. 编写一个函数 changeLength2D, 用以改变一个二维数组的长度。二维数组的每一维的长度都是可以变化的
@@ -117,6 +118,7 @@ namespace ArrayListSpace {
         void removeRange(int start, int end);
         int lastIndexOf(T theElement) const;
         void setCapacity();
+        void reverse();
 
     private:
         T *m_element;
@@ -439,6 +441,93 @@ namespace ArrayListSpace {
             this->setSize(newCapacity);
         }
     }
+
+    // 22. 1. 编写方法 ArrayList<T>::reverse，它原地颠倒线性表元素的顺序。不要使用 STL 函数 reverse
+    template <typename T>
+    void ArrayList<T>::reverse() {
+        if (this->size() <= 1) {
+            return;
+        }
+
+        for (int i=0; i < this->size()/2; i++) {
+            std::swap(this->m_element[i], this->m_element[this->size()-i-1]);
+        }
+    }
+
+    // 22. 4. 另外编写一个原地颠倒 arrayList 对象的方法。它不是 arrayList 的成员函数，不能直接访问 arrayList 的数据成员。
+    //        不过这个方法可以调用 arrayList 的成员函数
+    template <typename T>
+    void reverse(ArrayList<T> &arrayList) {
+        if (arrayList.size() <= 1) {
+            return;
+        }
+
+        for (int i=0; i < arrayList.size()/2; i++) {
+            std::swap(arrayList[i], arrayList[arrayList.size()-i-1]);
+        }
+    }
+
+    // 22. 6. 使用大小分别为 1000、5000、10000 的线性表，比较两个颠倒顺序算法的运行时间的性能
+    void compare() {
+        ArrayListSpace::ArrayList<int> arrayList(1000);
+        for (int i=0; i<1000; i++) {
+            arrayList.push_back(i);
+        }
+        double clocksPerMillis = double(CLOCKS_PER_SEC) / 1000;
+
+        time_t selfReverseTime[3];
+        time_t reverseTime[3];
+        int arrayListSize[3];
+
+        arrayListSize[0] = arrayList.size();
+        time_t startTime = clock();
+        arrayList.reverse();
+        time_t endTime = clock();
+        selfReverseTime[0] = endTime - startTime;
+
+        startTime = clock();
+        reverse(arrayList);
+        endTime = clock();
+        reverseTime[0] = endTime - startTime;
+
+        for (int i=0; i < 4000; i++) {
+            arrayList.push_back(i+1000);
+        }
+
+        arrayListSize[1] = arrayList.size();
+        startTime = clock();
+        arrayList.reverse();
+        endTime = clock();
+        selfReverseTime[1] = endTime - startTime;
+
+        startTime = clock();
+        reverse(arrayList);
+        endTime = clock();
+        reverseTime[1] = endTime - startTime;
+
+        for (int i=0; i < 5000; i++) {
+            arrayList.push_back(i+5000);
+        }
+
+        arrayListSize[2] = arrayList.size();
+        startTime = clock();
+        arrayList.reverse();
+        endTime = clock();
+        selfReverseTime[2] = endTime - startTime;
+
+        startTime = clock();
+        reverse(arrayList);
+        endTime = clock();
+        reverseTime[2] = endTime - startTime;
+
+        cout << "size()\t22.1\t22.4\n";
+        for (int i=0; i < 3; i++) {
+            cout << arrayListSize[i] << "\t"
+                << selfReverseTime[i] / clocksPerMillis << "\t"
+                << reverseTime[i] / clocksPerMillis << endl;
+        }
+
+    }
     void test() {
         ArrayList<int> arrayList(4);
         cout << "4. " << endl;
@@ -578,6 +667,26 @@ namespace ArrayListSpace {
         cout << arrayList.capacity() << " " << arrayList.size() << endl;
         arrayList.clear();
         cout << arrayList.capacity() << " " << arrayList.size() << endl;
+
+
+        cout << "20.1. " << endl;
+        for (int i=0; i < 10; i++) {
+            arrayList.push_back(i);
+            arrayList.output();
+            arrayList.reverse();
+            arrayList.output();
+        }
+        cout << "20.4. " << endl;
+        arrayList.clear();
+        for (int i=0; i < 10; i++) {
+            arrayList.push_back(i);
+            arrayList.output();
+            reverse(arrayList);
+            arrayList.output();
+        }
+
+        cout << "22. 6. " << endl;
+        compare();
     }
 }
 int main() {
