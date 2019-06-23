@@ -119,7 +119,9 @@ namespace ArrayListSpace {
         int lastIndexOf(T theElement) const;
         void setCapacity();
         void reverse();
-
+        void leftShift(int i);
+        void circularShift(int i);
+        void half();
     private:
         T *m_element;
         int m_arrayLength;
@@ -528,6 +530,93 @@ namespace ArrayListSpace {
         }
 
     }
+
+    // 23. 编写方法 ArrayList<T>::leftShift(i)，它将线性表的元素向左移动 i 个位置
+    template <typename T>
+    void ArrayList<T>::leftShift(int i) {
+        if (i < 0) {
+            throw "i should >= 0";
+        }
+        if (i == 0) {
+            return;
+        }
+        if (i >= this->size()) {
+            this->clear();
+            return;;
+        }
+        for (int j=0; j < i; j++) {
+            this->m_element[j].~T();
+        }
+        std::copy(this->m_element+i, this->m_element+this->size(), this->m_element);
+        for (int j=this->size()-i; j < this->size(); j++) {
+            this->m_element[j].~T();
+        }
+        m_listSize -= i;
+        this->setCapacity();
+    }
+
+    // 24. 在一个循环移动的操作中，线性表的元素根据给定的值，按顺时针方向移动。
+    //    比如 x = [0, 1, 2, 3, 4], 循环移动 2 的结果是 x = [2, 3, 4, 0, 1]
+    template <typename T>
+    void ArrayList<T>::circularShift(int i) {
+        if (i < 0) {
+            throw "i should be > 0";
+        }
+        i %= this->size();
+        if (i == 0) {
+            return;
+        }
+        this->reverse();
+
+        int leftSize = this->size() - i;
+        int rightSize = i;
+        for (int j = 0; j < leftSize/2; j++) {
+            std::swap(this->m_element[j], this->m_element[leftSize-j-1]);
+        }
+        for (int j = 0; j < rightSize/2; j++) {
+            std::swap(this->m_element[j+leftSize], this->m_element[this->size()-j-1]);
+        }
+    }
+
+    // 25. 调用语句 x.half() 可以将元素隔一个删除一个。
+    // 如果 x.size() = 7，x.element[] = [2, 13, 4, 5, 17, 8, 29], 那么 x.half() 的结果是 x.size() = 4, x.element[]=[2, 4, 17, 29]
+    // 如果 x.size() = 4, x.element[] = [2, 13, 4, 5], 那么 x.half() 的结果是 x.size() = 2, x.element=[2, 4]
+    // 如果 x 为空，x.half() 也为空
+    template <typename T>
+    void ArrayList<T>::half() {
+        if (this->size() <= 1) {
+            return;
+        }
+        int halfSize = (this->size() + 1) / 2;
+        for (int i=0; i < halfSize; i++) {
+            this->m_element[i] = this->m_element[i*2];
+        }
+
+        for (int i=halfSize; i < this->size(); i++) {
+            this->m_element[i].~T();
+        }
+        this->m_listSize = halfSize;
+        this->capacity();
+    }
+
+    // 26. 编写一个函数，它与练习 25 的方法 half 造价。这个函数不中 ArrayList 的成员函数，不能直接方法类的任何数据成员。
+    // 但是它利用类 ArrayList 的公共方法可以完成算法。
+    template <typename T>
+    void half(ArrayList<T> &arrayList) {
+        if (arrayList.size() <= 1) {
+            return;
+        }
+
+        int halfSize = (arrayList.size()+1)/2;
+        for (int i=0; i < halfSize; i++) {
+            arrayList[i] = arrayList[i*2];
+        }
+        for (int i=halfSize; i<arrayList.size(); i++) {
+            arrayList[i].~T();
+        }
+        arrayList.setSize(halfSize);
+        arrayList.capacity();
+    }
     void test() {
         ArrayList<int> arrayList(4);
         cout << "4. " << endl;
@@ -687,6 +776,52 @@ namespace ArrayListSpace {
 
         cout << "22. 6. " << endl;
         compare();
+
+        cout << "23. " << endl;
+        arrayList.setSize(10);
+        arrayList.output();
+        arrayList.leftShift(3);
+        arrayList.output();
+
+        cout << "24. " << endl;
+        arrayList.clear();
+        for (int i=0; i < 10; i++) {
+            arrayList.push_back(i+1);
+        }
+        arrayList.output();
+
+        for (int i=-1; i < 11; i++) {
+            try {
+                arrayList.circularShift(i);
+            } catch (char const *error) {
+                cout << error << endl;
+            }
+            cout << "shift(" << i << "): ";
+            arrayList.output();
+
+        }
+
+        cout << "25. " << endl;
+        arrayList.clear();
+        for (int i=0; i < 12; i++) {
+            arrayList.push_back(i+1);
+        }
+        arrayList.output();
+        for (int i=0; i < 5; i++) {
+            arrayList.half();
+            arrayList.output();
+        }
+
+        cout << "26. " << endl;
+        arrayList.clear();
+        for (int i=0; i < 12; i++) {
+            arrayList.push_back(i+1);
+        }
+        arrayList.output();
+        for (int i=0; i < 5; i++) {
+            half(arrayList);
+            arrayList.output();
+        }
     }
 }
 int main() {
