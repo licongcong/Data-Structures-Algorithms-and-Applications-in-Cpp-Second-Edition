@@ -122,6 +122,7 @@ namespace ArrayListSpace {
         void leftShift(int i);
         void circularShift(int i);
         void half();
+        void meld(const ArrayList<T> &firstArrayList, const ArrayList<T> &secondArrayList);
     private:
         T *m_element;
         int m_arrayLength;
@@ -617,6 +618,47 @@ namespace ArrayListSpace {
         arrayList.setSize(halfSize);
         arrayList.capacity();
     }
+
+    // 28. 令 a 和 b 是 ArrayList 的两个对象
+    // 　　编写方法 ArrayList<T>::meld(a, b), 它生成一个新的线性表从 a 的第 0 个元素开始，交替地包含 a 和 b 的元素。
+    //    如果一个表的元素取完了，就把另一个表的剩余元素附加到新表中。
+    //    调用语句 c.meld(a, b), 使 c 成为合并后的表
+    template <typename T>
+    void ArrayList<T>::meld(const ArrayListSpace::ArrayList<T> &firstArrayList,
+                                     const ArrayListSpace::ArrayList<T> &secondArrayList) {
+        int firstArrayListSize = firstArrayList.size();
+        int secondArrayListSize = secondArrayList.size();
+
+        int newArrayListSize = firstArrayListSize + secondArrayListSize;
+        this->m_arrayLength = newArrayListSize;
+        this->m_listSize = newArrayListSize;
+        this->m_initialCapacity = newArrayListSize;
+        this->m_element = new T[newArrayListSize];
+
+        // 处理剩余元素
+        int minArrayListSize = std::min(firstArrayListSize, secondArrayListSize);
+        if (firstArrayListSize > secondArrayListSize) {
+            copy(firstArrayList.m_element+secondArrayListSize,
+                    firstArrayList.m_element+firstArrayListSize,
+                    this->m_element+2*minArrayListSize);
+        } else if (secondArrayListSize > firstArrayListSize){
+            copy(secondArrayList.m_element+firstArrayListSize,
+                    secondArrayList.m_element+secondArrayListSize,
+                    this->m_element+2*minArrayListSize);
+        }
+
+        // 处理第一个 ArrayList 中的元素，位置为 0, 2，...
+        for (int i=0; i < minArrayListSize; i++) {
+            this->m_element[2*i] = firstArrayList.get(i); // 如果调用 insert() 会出现结果异常，原因后续再追
+        }
+
+        // 处理第二个 ArrayList 中的元素，位置为 1, 3, ...
+        for (int i=0; i < minArrayListSize; i++) {
+            this->m_element[2*i+1] = secondArrayList.get(i);
+        }
+    }
+
+
     void test() {
         ArrayList<int> arrayList(4);
         cout << "4. " << endl;
@@ -822,6 +864,44 @@ namespace ArrayListSpace {
             half(arrayList);
             arrayList.output();
         }
+
+        cout << "28. " << endl;
+        arrayList.clear();
+        newList.clear();
+        ArrayList<int> meldArray(0);
+        for (int i=0; i < 5; i++) {
+            arrayList.insert(i, 2*i);
+            newList.insert(i, 2*i+1);
+        }
+        try {
+            arrayList.output();
+            newList.output();
+            meldArray.meld(arrayList, newList);
+            meldArray.output();
+        } catch (char const* e) {
+            cout << e << endl;
+        }
+        newList.pop_back();
+        newList.output();
+        arrayList.output();
+        meldArray.meld(newList, arrayList);
+        meldArray.output();
+
+        arrayList.output();
+        newList.output();
+        meldArray.meld(arrayList, newList);
+        meldArray.output();
+
+        newList.clear();
+        newList.output();
+        arrayList.output();
+        meldArray.meld(newList, arrayList);
+        meldArray.output();
+        arrayList.output();
+        newList.output();
+        meldArray.meld(arrayList, newList);
+        meldArray.output();
+        
     }
 }
 int main() {
